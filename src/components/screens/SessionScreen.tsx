@@ -26,6 +26,8 @@ export default function SessionScreen() {
     const endAtRef = useRef<number>(0);
     const [now, setNow] = useState<number>(0);
     const [done, setDone] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
+    const pausedTimeRef = useRef<number>(0);
 
     // Notes & Fullscreen Toggle State
     const [showNotes, setShowNotes] = useState(false);
@@ -76,6 +78,36 @@ export default function SessionScreen() {
         }
     }
 
+    function handlePauseResume() {
+        if (isPaused) {
+            // Resume: add the paused duration to the end time
+            const pausedDuration = Date.now() - pausedTimeRef.current;
+            endAtRef.current += pausedDuration;
+            setIsPaused(false);
+        } else {
+            // Pause: record the current time
+            pausedTimeRef.current = Date.now();
+            setIsPaused(true);
+        }
+    }
+
+    function handleReset() {
+        const startNow = Date.now();
+        endAtRef.current = startNow + totalMs;
+        setNow(startNow);
+        setDone(false);
+        setIsPaused(false);
+        pausedTimeRef.current = 0;
+    }
+
+    function handleGoHome() {
+        if (document.fullscreenElement) {
+            document.exitFullscreen().catch(() => { });
+        }
+        window.location.href = "/";
+    }
+
+
     useEffect(() => {
         const startNow = Date.now();
         endAtRef.current = startNow + totalMs;
@@ -87,14 +119,14 @@ export default function SessionScreen() {
     }, []);
 
     useEffect(() => {
-        if (done) return;
+        if (done || isPaused) return;
         const id = setInterval(() => {
             const t = Date.now();
             setNow(t);
             if (endAtRef.current - t <= 0) setDone(true);
         }, 200);
         return () => clearInterval(id);
-    }, [done]);
+    }, [done, isPaused]);
 
     useEffect(() => {
         if (done) return;
@@ -119,6 +151,10 @@ export default function SessionScreen() {
                 setShowNotes={setShowNotes}
                 isFullscreen={isFullscreen}
                 toggleFullscreen={toggleFullscreen}
+                isPaused={isPaused}
+                onPauseResume={handlePauseResume}
+                onReset={handleReset}
+                onGoHome={handleGoHome}
             />
 
             {/* NOTES CARD */}
