@@ -1,4 +1,5 @@
 import { Activity } from "@/types";
+import DurationSelector from "./DurationSelector";
 
 interface SessionConfiguratorProps {
     activity: Activity;
@@ -41,28 +42,7 @@ export default function SessionConfigurator({
                 )}
 
                 {/* Duration */}
-                <div className="mt-6">
-                    <div className="flex items-center justify-between">
-                        <label className="text-sm text-white/75">Duration</label>
-                        <div className="rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-2 text-sm text-white/90">
-                            {minutes} min
-                        </div>
-                    </div>
-
-                    <input
-                        type="range"
-                        min={10}
-                        max={120}
-                        value={minutes}
-                        onChange={(e) => setMinutes(Number(e.target.value))}
-                        className="mt-4 w-full"
-                    />
-
-                    <div className="mt-2 flex justify-between text-xs text-white/45">
-                        <span>10m</span>
-                        <span>120m</span>
-                    </div>
-                </div>
+                <DurationSelector minutes={minutes} setMinutes={setMinutes} />
 
                 {/* Motivation */}
                 <div className="mt-7">
