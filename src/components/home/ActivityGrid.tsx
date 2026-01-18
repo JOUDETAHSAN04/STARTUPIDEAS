@@ -1,11 +1,15 @@
 import { ACTIVITIES } from "@/lib/constants";
 import { Activity } from "@/types";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
+} from "@/components/ui/tooltip";
 
 interface ActivityGridProps {
     selectedActivity: Activity;
     onSelect: (activity: Activity) => void;
-    // Passing effectiveActivity mainly to show "Selected: X" in the header if we want,
-    // but for the grid items themselves, they just need to know which is selected.
     effectiveActivityName: string;
 }
 
@@ -18,8 +22,8 @@ export default function ActivityGrid({
         return [
             "group relative w-full overflow-hidden rounded-3xl border p-6 text-left transition",
             "backdrop-blur-xl",
-            "flex flex-col justify-start",
-            "min-h-[150px]",
+            "flex flex-col items-center justify-center text-center", // Changed to center alignment
+            "min-h-[140px]", // Slightly reduced height
             selected
                 ? "border-white/20 bg-white/[0.10] shadow-[0_18px_80px_rgba(0,0,0,0.55)]"
                 : "border-white/10 bg-white/[0.05] hover:bg-white/[0.08] hover:border-white/15",
@@ -42,25 +46,36 @@ export default function ActivityGrid({
                 </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {ACTIVITIES.map((a) => {
-                    const selected = a.key === selectedActivity;
-                    return (
-                        <button
-                            key={a.key}
-                            type="button"
-                            onClick={() => onSelect(a.key)}
-                            className={tileClasses(selected)}
-                        >
-                            <div className={glowClasses(selected)} style={{ background: a.glow }} />
-                            <div className="relative flex h-full flex-col justify-start">
-                                <div className="text-2xl font-semibold leading-tight">{a.key}</div>
-                                <div className="mt-2 text-sm leading-snug text-white/70">{a.desc}</div>
-                            </div>
-                        </button>
-                    );
-                })}
-            </div>
+            <TooltipProvider>
+                <div className="grid gap-4 grid-cols-3 sm:grid-cols-3 lg:grid-cols-3">
+                    {ACTIVITIES.map((a) => {
+                        const selected = a.key === selectedActivity;
+                        const Icon = a.icon;
+
+                        return (
+                            <Tooltip key={a.key}>
+                                <TooltipTrigger asChild>
+                                    <button
+                                        type="button"
+                                        onClick={() => onSelect(a.key)}
+                                        className={tileClasses(selected)}
+                                    >
+                                        <div className={glowClasses(selected)} style={{ background: a.glow }} />
+
+                                        <div className="relative flex h-full flex-col items-center justify-center gap-3">
+                                            <Icon className={`w-8 h-8 ${selected ? 'text-white' : 'text-white/60 group-hover:text-white/90'} transition-colors duration-300`} strokeWidth={1.5} />
+                                            <div className="text-sm font-medium leading-tight">{a.key}</div>
+                                        </div>
+                                    </button>
+                                </TooltipTrigger>
+                                <TooltipContent side="bottom">
+                                    <p>{a.desc}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        );
+                    })}
+                </div>
+            </TooltipProvider>
         </section>
     );
 }
