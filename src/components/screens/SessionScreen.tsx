@@ -159,10 +159,10 @@ export default function SessionScreen() {
 
             {/* NOTES CARD */}
             <AnimatePresence>
-                {showNotes && <NotesCard notes={notes} show={showNotes} />}
+                {showNotes && <NotesCard notes={notes} show={showNotes} onClose={() => setShowNotes(false)} />}
             </AnimatePresence>
 
-            <div className="relative z-[2] grid h-full grid-cols-2">
+            <div className="relative z-[2] flex h-full flex-col lg:grid lg:grid-cols-2">
                 {/* LEFT: TIMER centered */}
                 <TimerDisplay
                     activity={activity}
@@ -177,7 +177,7 @@ export default function SessionScreen() {
                     fade={fade}
                 />
 
-                <div className="pointer-events-none absolute inset-y-0 left-1/2 w-px bg-white/5" />
+                <div className="pointer-events-none absolute inset-y-0 left-1/2 hidden w-px bg-white/5 lg:block" />
             </div>
         </AuroraBackground>
     );

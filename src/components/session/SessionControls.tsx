@@ -29,7 +29,7 @@ export default function SessionControls({
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <div className="absolute top-6 left-6 z-[100] flex flex-col gap-3">
+        <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-[100] flex flex-col gap-3">
             <TooltipProvider>
                 {/* Menu Toggle Button */}
                 <Tooltip>
