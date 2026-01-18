@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import SessionClient from "./session-client";
+import SessionScreen from "@/components/screens/SessionScreen";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +8,7 @@ export default function Page() {
     <Suspense
       fallback={<div className="h-screen w-screen bg-black" />}
     >
-      <SessionClient />
+      <SessionScreen />
     </Suspense>
   );
 }
