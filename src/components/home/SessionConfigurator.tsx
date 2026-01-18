@@ -1,3 +1,5 @@
+"use client";
+
 import { Activity } from "@/types";
 import DurationSelector from "./DurationSelector";
 
@@ -7,8 +9,8 @@ interface SessionConfiguratorProps {
     setCustomActivity: (val: string) => void;
     minutes: number;
     setMinutes: (val: number) => void;
-    motivation: string;
-    setMotivation: (val: string) => void;
+    notes: string;
+    setNotes: (val: string) => void;
     onStart: () => void;
     isStartDisabled: boolean;
 }
@@ -19,8 +21,8 @@ export default function SessionConfigurator({
     setCustomActivity,
     minutes,
     setMinutes,
-    motivation,
-    setMotivation,
+    notes,
+    setNotes,
     onStart,
     isStartDisabled,
 }: SessionConfiguratorProps) {
@@ -42,15 +44,17 @@ export default function SessionConfigurator({
                 )}
 
                 {/* Duration */}
-                <DurationSelector minutes={minutes} setMinutes={setMinutes} />
+                <div className="mt-6">
+                    <DurationSelector minutes={minutes} setMinutes={setMinutes} />
+                </div>
 
-                {/* Motivation */}
+                {/* Notes */}
                 <div className="mt-7">
-                    <label className="text-sm text-white/75">Motivation (optional)</label>
+                    <label className="text-sm text-white/75">Session Notes</label>
                     <textarea
-                        value={motivation}
-                        onChange={(e) => setMotivation(e.target.value)}
-                        placeholder="Your why… (e.g., build my future, finish the task, stay consistent)"
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                        placeholder="Jot down tasks, reminders, or your goal..."
                         className="mt-3 h-32 w-full resize-none rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-white/90 outline-none placeholder:text-white/40 focus:border-white/20"
                     />
                 </div>

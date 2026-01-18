@@ -12,7 +12,7 @@ export default function HomeScreen() {
     const [activity, setActivity] = useState<Activity>("Study");
     const [customActivity, setCustomActivity] = useState("");
     const [minutes, setMinutes] = useState<number>(50);
-    const [motivation, setMotivation] = useState("");
+    const [notes, setNotes] = useState("");
 
     const effectiveActivity = useMemo(() => {
         if (activity !== "Custom") return activity;
@@ -25,7 +25,7 @@ export default function HomeScreen() {
         const params = new URLSearchParams();
         params.set("activity", effectiveActivity);
         params.set("minutes", String(minutes));
-        if (motivation.trim()) params.set("motivation", motivation.trim());
+        if (notes.trim()) params.set("notes", notes.trim());
 
         try {
             await document.documentElement.requestFullscreen();
@@ -39,8 +39,8 @@ export default function HomeScreen() {
             <div className="mx-auto max-w-6xl px-8 py-12">
                 <header className="mb-10">
                     <h1 className="text-4xl font-semibold tracking-tight">Set your focus</h1>
-                    <p className="mt-2 max-w-2xl text-sm text-white/70">
-                        Pick what you’re doing, choose how long, add a “why” if you want — then we go full-screen.
+                    <p className="mt-2 text-sm text-white/70">
+                        Pick what you’re doing, choose how long, add notes if you want — then we go full-screen.
                     </p>
                 </header>
 
@@ -59,8 +59,8 @@ export default function HomeScreen() {
                         setCustomActivity={setCustomActivity}
                         minutes={minutes}
                         setMinutes={setMinutes}
-                        motivation={motivation}
-                        setMotivation={setMotivation}
+                        notes={notes}
+                        setNotes={setNotes}
                         onStart={handleStart}
                         isStartDisabled={isStartDisabled}
                     />

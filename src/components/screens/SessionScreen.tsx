@@ -5,7 +5,10 @@ import { useSearchParams } from "next/navigation";
 import AuroraBackground from "@/components/ui/AuroraBackground";
 import TimerDisplay from "@/components/session/TimerDisplay";
 import QuoteDisplay from "@/components/session/QuoteDisplay";
+import SessionControls from "@/components/session/SessionControls";
+import NotesCard from "@/components/session/NotesCard";
 import { pickQuote } from "@/lib/utils";
+import { AnimatePresence } from "framer-motion";
 
 export default function SessionScreen() {
     const searchParams = useSearchParams();
@@ -16,24 +19,33 @@ export default function SessionScreen() {
         ? Math.min(120, Math.max(10, minutesParam))
         : 50;
 
-    const motivation = searchParams.get("motivation") ?? "";
+    const notes = searchParams.get("notes") ?? "";
 
     const totalMs = minutes * 60_000;
-    const endAtRef = useRef<number>(Date.now() + totalMs);
-    const [now, setNow] = useState(Date.now());
+    const [isMounted, setIsMounted] = useState(false);
+    const endAtRef = useRef<number>(0);
+    const [now, setNow] = useState<number>(0);
     const [done, setDone] = useState(false);
 
-    // We set initial state for quote here, but it will be reset in useEffect to avoid hydration mismatch
-    // However, to keep it simple, we can just use a static initial quote or handle it via effect entirely.
-    // "pickQuote" uses random so it causes hydration issues if run during render.
-    // Better to start empty or fixed, then randomize on mount.
+    // Notes & Fullscreen Toggle State
+    const [showNotes, setShowNotes] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    // Quote State
+    // We'll treat notes as a source of "motivation" if simple enough, or just ignore for quotes
+    // For now, we stick to generic quotes unless user provided motivation before. Since we replaced it with Notes,
+    // we can use "Focus" as motivation seed or just pure random.
     const [quote, setQuote] = useState("");
     const [fade, setFade] = useState(false);
 
-    const remainingMs = useMemo(() => Math.max(0, endAtRef.current - now), [now]);
+    const remainingMs = useMemo(() => {
+        if (!isMounted) return totalMs;
+        return Math.max(0, endAtRef.current - now);
+    }, [isMounted, now, totalMs]);
 
     function changeQuote() {
-        const next = pickQuote(motivation);
+        // Pass empty string for motivation since we switched to Notes
+        const next = pickQuote("");
         setFade(true);
         setTimeout(() => {
             setQuote(next);
@@ -41,25 +53,46 @@ export default function SessionScreen() {
         }, 350);
     }
 
+    // Handle Fullscreen Events
+    useEffect(() => {
+        function handleFsChange() {
+            setIsFullscreen(!!document.fullscreenElement);
+        }
+        document.addEventListener("fullscreenchange", handleFsChange);
+        // Initialize check
+        handleFsChange();
+        return () => document.removeEventListener("fullscreenchange", handleFsChange);
+    }, []);
+
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement?.requestFullscreen().catch((e) => {
+                console.error("Failed to enter fullscreen:", e);
+            });
+        } else {
+            document.exitFullscreen().catch((e) => {
+                console.error("Failed to exit fullscreen:", e);
+            });
+        }
+    }
+
     useEffect(() => {
         const startNow = Date.now();
         endAtRef.current = startNow + totalMs;
         setNow(startNow);
         setDone(false);
-        // Initial quote set on client side to avoid hydration mismatch
-        setQuote(pickQuote(motivation));
+        setQuote(pickQuote(""));
+        setIsMounted(true);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         if (done) return;
-
         const id = setInterval(() => {
             const t = Date.now();
             setNow(t);
             if (endAtRef.current - t <= 0) setDone(true);
         }, 200);
-
         return () => clearInterval(id);
     }, [done]);
 
@@ -67,8 +100,7 @@ export default function SessionScreen() {
         if (done) return;
         const id = setInterval(changeQuote, 25_000);
         return () => clearInterval(id);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [done, motivation]);
+    }, [done]);
 
     useEffect(() => {
         if (!done) return;
@@ -81,6 +113,19 @@ export default function SessionScreen() {
 
     return (
         <AuroraBackground>
+            {/* CONTROLS */}
+            <SessionControls
+                showNotes={showNotes}
+                setShowNotes={setShowNotes}
+                isFullscreen={isFullscreen}
+                toggleFullscreen={toggleFullscreen}
+            />
+
+            {/* NOTES CARD */}
+            <AnimatePresence>
+                {showNotes && <NotesCard notes={notes} show={showNotes} />}
+            </AnimatePresence>
+
             <div className="relative z-[2] grid h-full grid-cols-2">
                 {/* LEFT: TIMER centered */}
                 <TimerDisplay
